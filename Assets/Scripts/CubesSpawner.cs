@@ -15,6 +15,7 @@ public class CubesSpawner : MonoBehaviour
     private int _minRandomPositionZ = -10;
     private int _maxRandomPositionZ = 10;
     private int _positionY = 10;
+    private float _time = 0.0f;
 
     private void Awake()
     {
@@ -31,7 +32,7 @@ public class CubesSpawner : MonoBehaviour
     }
     private void Start()
     {
-        InvokeRepeating(nameof(GetCube), 0.0f, _repeatRate);
+        InvokeRepeating(nameof(GetCube), _time, _repeatRate);
     }
 
     private Cube CreateFunc()
