@@ -13,7 +13,7 @@ public class Cube : MonoBehaviour
     private int _maxLifetime = 6;
     private bool _haveTouched = false;
 
-    public event Action<Cube> CubeParametersReset;
+    public event Action<Cube> CubeParametersReseted;
 
     private void Awake()
     {
@@ -55,7 +55,7 @@ public class Cube : MonoBehaviour
         yield return new WaitForSeconds(delay);
 
         ResetParameters();
-        CubeParametersReset?.Invoke(this);
+        CubeParametersReseted?.Invoke(this);
     }
 
     private void ResetParameters()

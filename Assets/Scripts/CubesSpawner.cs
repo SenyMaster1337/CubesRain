@@ -59,7 +59,7 @@ public class CubesSpawner : MonoBehaviour
     {
         Cube cube = Instantiate(_cubePrefab);
         cube.Init(_colorChanger);
-        cube.CubeParametersReset += ReleaseCubeToPool;
+        cube.CubeParametersReseted += ReleaseCubeToPool;
 
         return cube;
     }
@@ -75,7 +75,7 @@ public class CubesSpawner : MonoBehaviour
 
     private void ActionOnDestroy(Cube cube)
     {
-        cube.CubeParametersReset -= ReleaseCubeToPool;
+        cube.CubeParametersReseted -= ReleaseCubeToPool;
         Destroy(cube.gameObject);
     }
 
