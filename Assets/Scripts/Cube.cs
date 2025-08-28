@@ -11,8 +11,9 @@ public class Cube : MonoBehaviour
 
     private int _minLifetime = 2;
     private int _maxLifetime = 6;
+    private bool _haveTouched = false;
 
-    public event Action<Cube> GetCube;
+    public event Action<Cube> CubeParametersReset;
 
     private void Awake()
     {
@@ -27,11 +28,12 @@ public class Cube : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.GetComponent<Platform>() != null)
+        if (collision.collider.TryGetComponent(out Platform platform))
         {
-            if (_renderer.material.color == Color.white)
+            if (_haveTouched == false)
             {
                 _colorChanger.SetMaterial(_renderer);
+                _haveTouched = true;
             }
 
             StartLifetimeCount();
@@ -53,7 +55,7 @@ public class Cube : MonoBehaviour
         yield return new WaitForSeconds(delay);
 
         ResetParameters();
-        GetCube?.Invoke(this);
+        CubeParametersReset?.Invoke(this);
     }
 
     private void ResetParameters()
@@ -62,5 +64,6 @@ public class Cube : MonoBehaviour
         this.transform.rotation = Quaternion.identity;
         _rigidbody.velocity = Vector3.zero;
         _rigidbody.angularVelocity = Vector3.zero;
+        _haveTouched = false;
     }
 }

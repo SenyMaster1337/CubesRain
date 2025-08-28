@@ -9,7 +9,6 @@ public class CubesSpawner : MonoBehaviour
     [SerializeField] private float _delay;
     [SerializeField] private int _poolCapacity;
     [SerializeField] private int _poolMaxSize;
-    [SerializeField] private float _setRainTimeInSecond;
 
     private ObjectPool<Cube> _cubePool;
     private Coroutine _lifetimeCoroutine;
@@ -18,7 +17,7 @@ public class CubesSpawner : MonoBehaviour
     private int _minRandomPositionZ = -10;
     private int _maxRandomPositionZ = 10;
     private int _positionY = 10;
-    private float _realTimeRainTime = 0;
+    private bool _isSpawnerEnabled = true;
 
     private void Awake()
     {
@@ -39,12 +38,6 @@ public class CubesSpawner : MonoBehaviour
         StartCubesSpawnCount();
     }
 
-    private void Update()
-    {
-        if (_realTimeRainTime < _setRainTimeInSecond)
-        _realTimeRainTime += Time.deltaTime;
-    }
-
     private void StartCubesSpawnCount()
     {
         if (_lifetimeCoroutine != null)
@@ -55,7 +48,7 @@ public class CubesSpawner : MonoBehaviour
 
     private IEnumerator CountCubesSpawn()
     {
-        while (_realTimeRainTime <= _setRainTimeInSecond)
+        while (_isSpawnerEnabled)
         {
             yield return new WaitForSeconds(_delay);
             SpawnCube();
@@ -66,7 +59,7 @@ public class CubesSpawner : MonoBehaviour
     {
         Cube cube = Instantiate(_cubePrefab);
         cube.Init(_colorChanger);
-        cube.GetCube += ReleaseCubeToPool;
+        cube.CubeParametersReset += ReleaseCubeToPool;
 
         return cube;
     }
@@ -82,7 +75,7 @@ public class CubesSpawner : MonoBehaviour
 
     private void ActionOnDestroy(Cube cube)
     {
-        cube.GetCube -= ReleaseCubeToPool;
+        cube.CubeParametersReset -= ReleaseCubeToPool;
         Destroy(cube.gameObject);
     }
 
