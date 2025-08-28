@@ -654,9 +654,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cubePrefab: {fileID: 8717500411147466895, guid: f562635b2a5fa0a43ae7820df731268f, type: 3}
   _colorChanger: {fileID: 1944442892}
-  _repeatRate: 0.1
+  _delay: 0.1
   _poolCapacity: 50
   _poolMaxSize: 50
+  _setRainTimeInSecond: 60
 --- !u!1 &1944442890
 GameObject:
   m_ObjectHideFlags: 0

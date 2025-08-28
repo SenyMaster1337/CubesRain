@@ -1,18 +1,27 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
 public class Cube : MonoBehaviour
 {
-    private CubesSpawner _cubesSpawner;
     private ColorChanger _colorChanger;
+    private Renderer _renderer;
+    private Rigidbody _rigidbody;
     private Coroutine _lifetimeCoroutine;
 
     private int _minLifetime = 2;
     private int _maxLifetime = 6;
 
-    public void Init(CubesSpawner cubesSpawner, ColorChanger colorChanger)
+    public event Action<Cube> GetCube;
+
+    private void Awake()
     {
-        _cubesSpawner = cubesSpawner;
+        _renderer = this.GetComponent<Renderer>();
+        _rigidbody = this.GetComponent<Rigidbody>();
+    }
+
+    public void Init(ColorChanger colorChanger)
+    {
         _colorChanger = colorChanger;
     }
 
@@ -20,16 +29,16 @@ public class Cube : MonoBehaviour
     {
         if (collision.gameObject.GetComponent<Platform>() != null)
         {
-            if (this.GetComponent<Renderer>().material.color == Color.white)
+            if (_renderer.material.color == Color.white)
             {
-                _colorChanger.SetMaterial(this.GetComponent<Renderer>());
+                _colorChanger.SetMaterial(_renderer);
             }
 
             StartLifetimeCount();
         }
     }
 
-    public void StartLifetimeCount()
+    private void StartLifetimeCount()
     {
         if (_lifetimeCoroutine != null)
             StopCoroutine(_lifetimeCoroutine);
@@ -43,7 +52,15 @@ public class Cube : MonoBehaviour
 
         yield return new WaitForSeconds(delay);
 
-        _colorChanger.SetDefaultMaterial(this.GetComponent<Renderer>());
-        _cubesSpawner.GetCubeToPool(this);
+        ResetParameters();
+        GetCube?.Invoke(this);
+    }
+
+    private void ResetParameters()
+    {
+        _colorChanger.SetDefaultMaterial(_renderer);
+        this.transform.rotation = Quaternion.identity;
+        _rigidbody.velocity = Vector3.zero;
+        _rigidbody.angularVelocity = Vector3.zero;
     }
 }

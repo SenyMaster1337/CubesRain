@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -5,17 +6,19 @@ public class CubesSpawner : MonoBehaviour
 {
     [SerializeField] private Cube _cubePrefab;
     [SerializeField] private ColorChanger _colorChanger;
-    [SerializeField] private float _repeatRate;
+    [SerializeField] private float _delay;
     [SerializeField] private int _poolCapacity;
     [SerializeField] private int _poolMaxSize;
+    [SerializeField] private float _setRainTimeInSecond;
 
     private ObjectPool<Cube> _cubePool;
+    private Coroutine _lifetimeCoroutine;
     private int _minRandomPositionX = -10;
     private int _maxRandomPositionX = 10;
     private int _minRandomPositionZ = -10;
     private int _maxRandomPositionZ = 10;
     private int _positionY = 10;
-    private float _time = 0.0f;
+    private float _realTimeRainTime = 0;
 
     private void Awake()
     {
@@ -24,21 +27,46 @@ public class CubesSpawner : MonoBehaviour
             createFunc: () => CreateFunc(),
             actionOnGet: (cube) => ActionOnGet(cube),
             actionOnRelease: (cube) => cube.gameObject.SetActive(false),
-            actionOnDestroy: (cube) => Destroy(cube.gameObject),
+            actionOnDestroy: (cube) => ActionOnDestroy(cube),
             collectionCheck: true,
             defaultCapacity: _poolCapacity,
             maxSize: _poolMaxSize
             );
     }
+
     private void Start()
     {
-        InvokeRepeating(nameof(GetCube), _time, _repeatRate);
+        StartCubesSpawnCount();
+    }
+
+    private void Update()
+    {
+        if (_realTimeRainTime < _setRainTimeInSecond)
+        _realTimeRainTime += Time.deltaTime;
+    }
+
+    private void StartCubesSpawnCount()
+    {
+        if (_lifetimeCoroutine != null)
+            StopCoroutine(_lifetimeCoroutine);
+
+        _lifetimeCoroutine = StartCoroutine(CountCubesSpawn());
+    }
+
+    private IEnumerator CountCubesSpawn()
+    {
+        while (_realTimeRainTime <= _setRainTimeInSecond)
+        {
+            yield return new WaitForSeconds(_delay);
+            SpawnCube();
+        }
     }
 
     private Cube CreateFunc()
     {
         Cube cube = Instantiate(_cubePrefab);
-        cube.Init(this, _colorChanger);
+        cube.Init(_colorChanger);
+        cube.GetCube += ReleaseCubeToPool;
 
         return cube;
     }
@@ -52,12 +80,18 @@ public class CubesSpawner : MonoBehaviour
         cube.gameObject.SetActive(true);
     }
 
-    private void GetCube()
+    private void ActionOnDestroy(Cube cube)
+    {
+        cube.GetCube -= ReleaseCubeToPool;
+        Destroy(cube.gameObject);
+    }
+
+    private void SpawnCube()
     {
         _cubePool.Get();
     }
 
-    public void GetCubeToPool(Cube cube)
+    public void ReleaseCubeToPool(Cube cube)
     {
         _cubePool.Release(cube);
     }
