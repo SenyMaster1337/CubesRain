@@ -24,9 +24,9 @@ public class CubesSpawner : MonoBehaviour
         _cubePool = new ObjectPool<Cube>
             (
             createFunc: () => CreateFunc(),
-            actionOnGet: (cube) => ActionOnGet(cube),
+            actionOnGet: (cube) => ChangeParameters(cube),
             actionOnRelease: (cube) => cube.gameObject.SetActive(false),
-            actionOnDestroy: (cube) => ActionOnDestroy(cube),
+            actionOnDestroy: (cube) => DestroyCube(cube),
             collectionCheck: true,
             defaultCapacity: _poolCapacity,
             maxSize: _poolMaxSize
@@ -48,9 +48,11 @@ public class CubesSpawner : MonoBehaviour
 
     private IEnumerator CountCubesSpawn()
     {
+        var wait = new WaitForSeconds(_delay);
+
         while (_isSpawnerEnabled)
         {
-            yield return new WaitForSeconds(_delay);
+            yield return wait;
             SpawnCube();
         }
     }
@@ -64,7 +66,7 @@ public class CubesSpawner : MonoBehaviour
         return cube;
     }
 
-    private void ActionOnGet(Cube cube)
+    private void ChangeParameters(Cube cube)
     {
         int randomPositionX = UnityEngine.Random.Range(_minRandomPositionX, _maxRandomPositionX);
         int randomPositionZ = UnityEngine.Random.Range(_minRandomPositionZ, _maxRandomPositionZ);
@@ -73,7 +75,7 @@ public class CubesSpawner : MonoBehaviour
         cube.gameObject.SetActive(true);
     }
 
-    private void ActionOnDestroy(Cube cube)
+    private void DestroyCube(Cube cube)
     {
         cube.CubeParametersReseted -= ReleaseCubeToPool;
         Destroy(cube.gameObject);
@@ -84,7 +86,7 @@ public class CubesSpawner : MonoBehaviour
         _cubePool.Get();
     }
 
-    public void ReleaseCubeToPool(Cube cube)
+    private void ReleaseCubeToPool(Cube cube)
     {
         _cubePool.Release(cube);
     }

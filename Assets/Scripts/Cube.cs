@@ -17,8 +17,8 @@ public class Cube : MonoBehaviour
 
     private void Awake()
     {
-        _renderer = this.GetComponent<Renderer>();
-        _rigidbody = this.GetComponent<Rigidbody>();
+        _renderer = GetComponent<Renderer>();
+        _rigidbody = GetComponent<Rigidbody>();
     }
 
     public void Init(ColorChanger colorChanger)
@@ -28,15 +28,14 @@ public class Cube : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.collider.TryGetComponent(out Platform platform))
+        if (_haveTouched == false)
         {
-            if (_haveTouched == false)
+            if (collision.collider.TryGetComponent(out Platform platform))
             {
-                _colorChanger.SetMaterial(_renderer);
                 _haveTouched = true;
+                _colorChanger.SetMaterial(_renderer);
+                StartLifetimeCount();
             }
-
-            StartLifetimeCount();
         }
     }
 
